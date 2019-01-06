@@ -1,3 +1,5 @@
+import { Ball } from './gameObjects.mjs';
+
 window.onload = function() {
   const canvas = document.getElementById("gameBoard");
   const ctx = canvas.getContext("2d");
@@ -13,25 +15,12 @@ window.onload = function() {
   let upPressed = false;
   let downPressed = false;
   
+  var ball1 = new Ball(50, 50, 10);
+
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBall();
-    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-      dx = -dx;
-    }
-    if (y + dy > canvas.height - ballRadius || y + dy < ballRadius) {
-      dy = -dy;
-    }
-    x += dx;
-    y += dy;
-  }
-  
-  function drawBall() {
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
+    ball1.drawBall(ctx, canvas);
   }
   
   document.addEventListener("keydown", keyDownHandler, false);

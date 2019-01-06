@@ -11,5 +11,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Platformer Game is listening on port ${PORT}.`);
+  console.log(`2D Game is listening on port ${PORT}.`);
 });
