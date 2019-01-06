@@ -1,9 +1,7 @@
 window.onload = function() {
   const canvas = document.getElementById("gameBoard");
   const ctx = canvas.getContext("2d");
-
-  const image = document.getElementById("source");
-  console.log(image);
+  
   let x = 50;
   let y = 50;
   let dx = 2;
@@ -17,7 +15,6 @@ window.onload = function() {
   
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.drawImage(image, 50, 50);
     drawBall();
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
       dx = -dx;
@@ -27,18 +24,6 @@ window.onload = function() {
     }
     x += dx;
     y += dy;
-    // if (rightPressed) {
-    //   x += dx;
-    // }
-    // if (leftPressed) {
-    //   x -= dx;
-    // }
-    // if (upPressed) {
-    //   y -= dy;
-    // }
-    // if (downPressed) {
-    //   y += dy;
-    // }
   }
   
   function drawBall() {
@@ -80,24 +65,3 @@ window.onload = function() {
   
   setInterval(draw, 10);
 }
-
-
-// ctx.beginPath();
-// ctx.rect(20, 40, 50, 50);
-// ctx.fillStyle = "#FF0000";
-// ctx.fill();
-// ctx.closePath();
-
-// //circle
-// ctx.beginPath();
-// ctx.arc(240, 160, 20, 0, Math.PI*2, false);
-// ctx.fillStyle = "green";
-// ctx.fill();
-// ctx.closePath();
-
-// //block
-// ctx.beginPath();
-// ctx.rect(160, 10, 100, 40);
-// ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
-// ctx.stroke();
-// ctx.closePath();
