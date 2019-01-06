@@ -14,8 +14,8 @@ window.onload = function() {
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ball1.drawBall(ctx, canvas);
     player.drawPaddle(ctx, canvas);
+    ball1.drawBall(ctx, player.x, player.width, player.height, canvas);
     if (rightPressed) {
       player.moveRight();
     }

@@ -7,11 +7,11 @@ export class Ball {
     this.radius = radius;
   }
 
-  drawBall(ctx, canvas) {
-    if (this.x + this.dx > canvas.width - this.radius || this.x + this.dx < this.radius) {
+  drawBall(ctx, paddleX, paddleWidth, paddleHeight, canvas) {
+    if (this.xHitWall(canvas)) {
       this.dx = -this.dx;
     }
-    if (this.y + this.dy > canvas.height - this.radius || this.y + this.dy < this.radius) {
+    if (this.yHitWall(canvas) || this.yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas)) {
       this.dy = -this.dy;
     }
     ctx.beginPath();
@@ -21,6 +21,18 @@ export class Ball {
     ctx.closePath();
     this.x += this.dx;
     this.y += this.dy;
+  }
+
+  xHitWall(canvas) {
+    return this.x + this.dx > canvas.width-this.radius || this.x+this.dx < this.radius;
+  }
+
+  yHitWall(canvas) {
+    return this.y + this.dy > canvas.height-this.radius || this.y+this.dy < this.radius;
+  }
+
+  yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) {
+    return (this.x >= paddleX && this.x <= paddleX+paddleWidth) && this.y + this.dy > canvas.height-paddleHeight-10-this.radius;
   }
 }
 
