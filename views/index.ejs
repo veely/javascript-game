@@ -1,12 +1,19 @@
 <!DOCTYPE = html>
 <html>
   <head>
-    <title>2D Platformer</title>
+    <meta charset="utf-8" />
+    <title>2D Game</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
   </head>
   <body>
-    <h1>A simple 2D platformer game built using JavaScript.</h1>
-    <canvas>
-      
-    </canvas>
+    <h1>A simple 2D game built using JavaScript.</h1>
+    <canvas id="gameBoard" width="480" height="320"></canvas>
+    <script src="scripts/canvas.js"></script>
+    <div style="display:none;">
+      <img id="source" src="images/bg.png">
+    </div>
   </body>
 </html>
