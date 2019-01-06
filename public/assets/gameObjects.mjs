@@ -8,7 +8,7 @@ export class Ball {
   }
 
   drawBall(ctx, paddleX, paddleWidth, paddleHeight, canvas) {
-    if (this.xHitWall(canvas)) {
+    if (this.xHitWall(canvas) || this.xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas)) {
       this.dx = -this.dx;
     }
     if (this.yHitWall(canvas) || this.yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas)) {
@@ -32,7 +32,11 @@ export class Ball {
   }
 
   yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) {
-    return (this.x >= paddleX && this.x <= paddleX+paddleWidth) && this.y + this.dy > canvas.height-paddleHeight-10-this.radius;
+    return (this.x+this.dx > paddleX && this.x+this.dx < paddleX+paddleWidth) && this.y+this.dy > canvas.height-paddleHeight-10-this.radius;
+  }
+
+  xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) {
+    return (this.y+this.dy > canvas.height-paddleHeight-10 && this.y+this.dy < canvas.height-10) && ((this.x+this.dx > paddleX-this.radius && this.x+this.dx < paddleX+paddleWidth) || (this.x+this.dx < paddleX+paddleWidth+this.radius && this.x+this.dx > paddleX));
   }
 }
 
