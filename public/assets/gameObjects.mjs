@@ -8,12 +8,26 @@ export class Ball {
   }
 
   drawBall(ctx, paddleX, paddleWidth, paddleHeight, canvas) {
-    if (this.xHitWall(canvas) || this.xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas)) {
+    if (this.xHitWall(canvas)) {
       this.dx = -this.dx;
     }
-    if (this.yHitWall(canvas) || this.yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas)) {
+
+    //make this more readable
+    if (this.yHitWall(canvas) || (this.dy > 0 && this.yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas))) {
       this.dy = -this.dy;
     }
+
+    //make this more readable
+    if (this.dy > 0) {
+      if (this.xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) === "left") {
+        this.dx = -Math.abs(this.dx);
+        this.dy = -Math.abs(this.dy);
+      } else if (this.xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) === "right") {
+        this.dx = Math.abs(this.dx);
+        this.dy = -Math.abs(this.dy);
+      }
+    }
+
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
     ctx.fillStyle = "#0095DD";
@@ -36,7 +50,15 @@ export class Ball {
   }
 
   xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) {
-    return (this.y+this.dy > canvas.height-paddleHeight-10 && this.y+this.dy < canvas.height-10) && ((this.x+this.dx > paddleX-this.radius && this.x+this.dx < paddleX+paddleWidth) || (this.x+this.dx < paddleX+paddleWidth+this.radius && this.x+this.dx > paddleX));
+    if (this.y+this.dy > canvas.height-paddleHeight-10 && this.y+this.dy < canvas.height-10) {
+      if (this.x+this.dx > paddleX-this.radius && this.x+this.dx < paddleX+paddleWidth) {
+        return "left";
+      } else if (this.x+this.dx < paddleX+paddleWidth+this.radius && this.x+this.dx > paddleX) {
+        return "right";
+      }
+    } else {
+      return false;
+    }
   }
 }
 
