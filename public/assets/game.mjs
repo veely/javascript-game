@@ -47,18 +47,62 @@ window.onload = function() {
           ctx.fillStyle = "#0095DD";
           ctx.fill();
           ctx.closePath();
-          if ((ball.x+ball.dx > brickX && ball.x+ball.dx < brickX+brickWidth) && (ball.y+ball.dy > brickY && ball.y+ball.dy < brickY+brickHeight)) {
+        }
+      }
+    }
+  }
+
+  function collisionDetection() {
+    for (let c=0; c<brickColumnCount; c++) {
+      for (let r=0; r<brickRowCount; r++) {
+        if (!bricks[c][r].hit) {
+          if (yHitBrick(bricks[c][r]) === "up") {
+            ball.dy = -Math.abs(ball.dy);
             bricks[c][r].hit = true;
-            ball.dy = -ball.dy;
+          } else if (yHitBrick(bricks[c][r]) === "down") {
+            ball.dy = Math.abs(ball.dy);
+            bricks[c][r].hit = true;
+          }
+          if (xHitBrick(bricks[c][r]) === "left") {
+            ball.dx = -Math.abs(ball.dx);
+            bricks[c][r].hit = true;
+          } else if (xHitBrick(bricks[c][r]) === "right") {
+            ball.dx = Math.abs(ball.dx);
+            bricks[c][r].hit = true;
           }
         }
       }
     }
   }
 
+  function xHitBrick(brick) {
+    if (ball.y+ball.dy > brick.y && ball.y+ball.dy < brick.y+brickHeight) {
+      if (ball.x+ball.dx > brick.x-ball.radius && ball.x+ball.dx < brick.x+brickWidth) {
+        return "left";
+      } else if (ball.x+ball.dx < brick.x+brickWidth+ball.radius && ball.x+ball.dx > brick.x) {
+        return "right";
+      }
+    } else {
+      return false;
+    }
+  }
+
+  function yHitBrick(brick) {
+    if (ball.x+ball.dx > brick.x && ball.x+ball.dx < brick.x+brickWidth) {
+      if (ball.y+ball.dy > brick.y-ball.radius && ball.y+ball.dy < brick.y+brickHeight) {
+        return "up";
+      } else if (ball.y+ball.dy < brick.y+brickHeight+ball.radius && ball.y+ball.dy > brick.y) {
+        return "down";
+      }
+    } else {
+      return false;
+    }
+  }
+
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks(ball);
+    collisionDetection();
     player.drawPaddle(ctx, canvas);
     ball.drawBall(ctx, player.x, player.width, player.height, canvas);
     if (rightPressed && player.x+player.width < canvas.width) {
