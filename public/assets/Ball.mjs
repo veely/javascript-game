@@ -1,9 +1,9 @@
 export class Ball {
-  constructor(x, y, radius) {
+  constructor(x, y, radius, speed) {
     this.x = x;
     this.y = y;
-    this.dx = 2;
-    this.dy = 2;
+    this.dx = speed;
+    this.dy = speed;
     this.radius = radius;
   }
 
@@ -38,11 +38,11 @@ export class Ball {
   }
 
   xHitWall(canvas) {
-    return this.x + this.dx > canvas.width-this.radius || this.x+this.dx < this.radius;
+    return this.x+this.dx > canvas.width-this.radius || this.x+this.dx < this.radius;
   }
 
   yHitWall(canvas) {
-    return this.y + this.dy > canvas.height-this.radius || this.y+this.dy < this.radius;
+    return this.y+this.dy > canvas.height-this.radius || this.y+this.dy < this.radius;
   }
 
   yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) {

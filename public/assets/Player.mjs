@@ -16,11 +16,10 @@ export class Player {
   }
 
   moveRight() {
-    this.x += 3;
+    this.x += this.speed;
   }
 
   moveLeft() {
-    this.x -= 3;
-
+    this.x -= this.speed;
   }
 }
