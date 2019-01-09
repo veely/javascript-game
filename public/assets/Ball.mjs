@@ -7,22 +7,33 @@ export class Ball {
     this.radius = radius;
   }
 
-  drawBall(ctx, paddleX, paddleWidth, paddleHeight, canvas) {
+  drawBall(ctx, paddle, canvas, interval) {
     if (this.xHitWall(canvas)) {
       this.dx = -this.dx;
     }
 
     //make this more readable
-    if (this.yHitWall(canvas) || (this.dy > 0 && this.yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas))) {
+    if (this.yHitWall(canvas) || (this.dy > 0 && this.yHitPaddle(paddle.x, paddle.width, paddle.height, canvas))) {
       this.dy = -this.dy;
+    } else if (this.yHitBottom(canvas)) {
+      paddle.lives -= 1;
+      if (paddle.lives) {
+        paddle.x = (canvas.width - paddle.width) / 2;
+        this.x = canvas.width/2;
+        this.y = canvas.height - 23;
+      } else {
+        alert("Game Over!");
+        document.location.reload();
+        clearInterval(interval);
+      }
     }
 
     //make this more readable
     if (this.dy > 0) {
-      if (this.xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) === "left") {
+      if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "left") {
         this.dx = -Math.abs(this.dx);
         this.dy = -Math.abs(this.dy);
-      } else if (this.xHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) === "right") {
+      } else if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "right") {
         this.dx = Math.abs(this.dx);
         this.dy = -Math.abs(this.dy);
       }
@@ -42,7 +53,11 @@ export class Ball {
   }
 
   yHitWall(canvas) {
-    return this.y+this.dy > canvas.height-this.radius || this.y+this.dy < this.radius;
+    return this.y+this.dy < this.radius;
+  }
+
+  yHitBottom(canvas) {
+    return this.y+this.dy > canvas.height-this.radius;
   }
 
   yHitPaddle(paddleX, paddleWidth, paddleHeight, canvas) {

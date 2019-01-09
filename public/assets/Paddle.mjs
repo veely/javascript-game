@@ -1,4 +1,4 @@
-export class Player {
+export class Paddle {
   constructor(lives, speed, canvas) {
     this.lives = lives;
     this.speed = speed;

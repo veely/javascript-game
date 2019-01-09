@@ -1,5 +1,5 @@
 import { Ball } from './Ball.mjs';
-import { Player } from './Player.mjs';
+import { Paddle } from './Paddle.mjs';
 
 window.onload = function() {
   const canvas = document.getElementById("gameBoard");
@@ -8,6 +8,7 @@ window.onload = function() {
   let rightPressed = false;
   let leftPressed = false;
   
+  let score = 0;
   let lives = 3;
   let paddleSpeed = 5;
 
@@ -22,7 +23,7 @@ window.onload = function() {
   const brickOffsetLeft = 30;
 
   var ball = new Ball(canvas.width/2, canvas.height - 23, ballRadius, ballSpeed);
-  var player = new Player(lives, paddleSpeed, canvas);
+  var paddle = new Paddle(lives, paddleSpeed, canvas);
 
   var bricks = [];
   for (let c=0; c<brickColumnCount; c++) {
@@ -32,7 +33,19 @@ window.onload = function() {
     }
   }
 
-  function drawBricks(ball) {
+  function drawLives() {
+    ctx.font = "16px Cambria";
+    ctx.fillStyle = "#ff6666";
+    ctx.fillText("Lives: "+paddle.lives, canvas.width-65, 20);
+  }
+
+  function drawScore() {
+    ctx.font = "16px Cambria";
+    ctx.fillstyle = "#ff6666";
+    ctx.fillText("Score: "+score, 13, 20);
+  }
+
+  function drawBricks() {
     for (let c=0; c<brickColumnCount; c++) {
       for (let r=0; r<brickRowCount; r++) {
         if (!bricks[c][r].hit) {
@@ -57,16 +70,20 @@ window.onload = function() {
           if (yHitBrick(bricks[c][r]) === "up") {
             ball.dy = -Math.abs(ball.dy);
             bricks[c][r].hit = true;
+            score += 1;
           } else if (yHitBrick(bricks[c][r]) === "down") {
             ball.dy = Math.abs(ball.dy);
             bricks[c][r].hit = true;
+            score += 1;
           }
           if (xHitBrick(bricks[c][r]) === "left") {
             ball.dx = -Math.abs(ball.dx);
             bricks[c][r].hit = true;
+            score += 1;
           } else if (xHitBrick(bricks[c][r]) === "right") {
             ball.dx = Math.abs(ball.dx);
             bricks[c][r].hit = true;
+            score += 1;
           }
         }
       }
@@ -99,15 +116,17 @@ window.onload = function() {
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBricks(ball);
+    drawLives();
+    drawScore();
+    drawBricks();
     collisionDetection();
-    player.drawPaddle(ctx, canvas);
-    ball.drawBall(ctx, player.x, player.width, player.height, canvas);
-    if (rightPressed && player.x+player.width < canvas.width) {
-      player.moveRight();
+    paddle.drawPaddle(ctx, canvas);
+    ball.drawBall(ctx, paddle, canvas, interval);
+    if (rightPressed && paddle.x+paddle.width < canvas.width) {
+      paddle.moveRight();
     }
-    if (leftPressed && player.x > 0) {
-      player.moveLeft();
+    if (leftPressed && paddle.x > 0) {
+      paddle.moveLeft();
     }
   }
   
@@ -130,5 +149,5 @@ window.onload = function() {
     }
   }
   
-  setInterval(draw, 10);
+  const interval = setInterval(draw, 10);
 }
