@@ -10,7 +10,7 @@ export class Player {
   drawPaddle(ctx, canvas) {
     ctx.beginPath();
     ctx.rect(this.x, canvas.height - this.height - 10, this.width, this.height);
-    ctx.fillStyle = "#0095DD";
+    ctx.fillStyle = "#ff6666";
     ctx.fill();
     ctx.closePath();    
   }

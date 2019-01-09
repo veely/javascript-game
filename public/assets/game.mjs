@@ -7,8 +7,6 @@ window.onload = function() {
   
   let rightPressed = false;
   let leftPressed = false;
-  // let upPressed = false;
-  // let downPressed = false;
   
   let lives = 3;
   let paddleSpeed = 5;
@@ -44,7 +42,7 @@ window.onload = function() {
           bricks[c][r].y = brickY;
           ctx.beginPath();
           ctx.rect(brickX, brickY, brickWidth, brickHeight);
-          ctx.fillStyle = "#0095DD";
+          ctx.fillStyle = "#ff6666";
           ctx.fill();
           ctx.closePath();
         }
@@ -122,11 +120,6 @@ window.onload = function() {
     } else if (e.key == "Left" || e.key == "ArrowLeft") {
       leftPressed = true;
     }
-    // if (e.key == "Up" || e.key == "ArrowUp") {
-    //   upPressed = true;
-    // } else if (e.key == "Down" || e.key == "ArrowDown") {
-    //   downPressed = true;
-    // }
   }
   
   function keyUpHandler(e) {
@@ -135,11 +128,6 @@ window.onload = function() {
     } else if (e.key == "Left" || e.key == "ArrowLeft") {
       leftPressed = false;
     }
-    // if (e.key == "Up" || e.key == "ArrowUp") {
-    //   upPressed = false;
-    // } else if (e.key == "Down" || e.key == "ArrowDown") {
-    //   downPressed = false;
-    // }
   }
   
   setInterval(draw, 10);
