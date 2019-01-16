@@ -4,6 +4,8 @@ import { Paddle } from './Paddle.mjs';
 window.onload = function() {
   const canvas = document.getElementById("gameBoard");
   const ctx = canvas.getContext("2d");
+  let client_id = null;
+
   
   let rightPressed = false;
   let leftPressed = false;
@@ -11,7 +13,7 @@ window.onload = function() {
   let score = 0;
   let lives = 3;
   let paddleSpeed = 5;
-
+  
   let ballSpeed = 3;
   let ballRadius = 10;
   const brickRowCount = 4;
@@ -21,10 +23,13 @@ window.onload = function() {
   const brickPadding = 10;
   const brickOffsetTop = 30;
   const brickOffsetLeft = 30;
-
+  const paddleHeight = 15;
+  const paddleWidth = 75;
+  
   var ball = new Ball(canvas.width/2, canvas.height - 23, ballRadius, ballSpeed);
-  var paddle = new Paddle(lives, paddleSpeed, canvas);
-
+  var paddle = new Paddle(lives, paddleSpeed, canvas, canvas.height - paddleHeight - 10, paddleHeight, paddleWidth);
+  var paddle2 = new Paddle(lives, paddleSpeed, canvas, 10, paddleHeight, paddleWidth);
+  
   var bricks = [];
   for (let c=0; c<brickColumnCount; c++) {
     bricks[c] = [];
@@ -32,6 +37,22 @@ window.onload = function() {
       bricks[c][r] = { x: 0, y: 0, hit: false };
     }
   }
+  
+  const client = new WebSocket("ws://localhost:3001/");
+  client.onopen = (openEvent) => {
+    console.log('Connection established');
+    client.onmessage = (event) => {
+      let data = JSON.parse(event.data);
+      switch(data.type) {
+        case 'id':
+          client_id = data.id;
+          break;
+        case 'paddle':
+          paddle2.x = data.position;
+          break;
+      }
+    };
+  };
 
   function drawLives() {
     ctx.font = "16px Cambria";
@@ -118,16 +139,20 @@ window.onload = function() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawLives();
     drawScore();
-    drawBricks();
+    // drawBricks();
     collisionDetection();
     paddle.drawPaddle(ctx, canvas);
-    ball.drawBall(ctx, paddle, canvas, interval);
+    paddle2.drawPaddle(ctx, canvas);
+    // ball.drawBall(ctx, paddle, canvas, interval);
     if (rightPressed && paddle.x+paddle.width < canvas.width) {
       paddle.moveRight();
+      client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle.x }));
     }
     if (leftPressed && paddle.x > 0) {
       paddle.moveLeft();
+      client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle.x }));
     }
+
   }
   
   document.addEventListener("keydown", keyDownHandler, false);
