@@ -44,7 +44,23 @@ wss.on('connection', function connection(ws) {
         } else if (data.id === 1) {
           clients[0].send(JSON.stringify({ type: 'opponent', id: 1, position: playerData['1'] }));
         }
-        console.log(playerData);
+        break;
+      case 'ball':
+        let newBallData = {
+          type: 'ball',
+          x: canvasWidth-data.x,
+          y: canvasHeight-data.y,
+          dx: -data.dx,
+          dy: -data.dy
+        }
+        if (data.playerID === 0) {
+          clients[1].send(JSON.stringify(newBallData));
+        } else if (data.playerID === 1) {
+          clients[0].send(JSON.stringify(newBallData));
+        }
+        break;
+      default:
+        console.log(data);
         break;
     }
   });

@@ -110,11 +110,11 @@ window.onload = function() {
             bricks[c][r].hit = true;
             score += 1;
           }
-          if (xHitBrick(bricks[c][r]) === "left") {
+          if (ballHitBrick(bricks[c][r]) === "left") {
             ball.dx = -Math.abs(ball.dx);
             bricks[c][r].hit = true;
             score += 1;
-          } else if (xHitBrick(bricks[c][r]) === "right") {
+          } else if (ballHitBrick(bricks[c][r]) === "right") {
             ball.dx = Math.abs(ball.dx);
             bricks[c][r].hit = true;
             score += 1;
@@ -124,7 +124,7 @@ window.onload = function() {
     }
   }
 
-  function xHitBrick(brick) {
+  function ballHitBrick(brick) {
     if (ball.y+ball.dy > brick.y && ball.y+ball.dy < brick.y+brickHeight) {
       if (ball.x+ball.dx > brick.x-ball.radius && ball.x+ball.dx < brick.x+brickWidth) {
         return "left";
@@ -151,13 +151,13 @@ window.onload = function() {
   function draw() {
     if (start) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawLives();
-      drawScore();
+      // drawLives();
+      // drawScore();
       // drawBricks();
       // collisionDetection();
       paddle1.drawPaddle(ctx, canvas);
       paddle2.drawPaddle(ctx, canvas);
-      ball.drawBall(ctx, paddle1, canvas, interval);
+      drawBall();
       if (rightPressed && paddle1.x+paddle1.width < canvas.width) {
         paddle1.moveRight();
         client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle1.x }));
@@ -166,6 +166,95 @@ window.onload = function() {
         paddle1.moveLeft();
         client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle1.x }));
       }
+    }
+  }
+
+  function drawBall() {
+    if (xBallHitWall()) {
+      ball.dx = -ball.dx;
+    }
+
+    //make this more readable
+    if (ball.dy > 0) {
+      if (yBallHitPaddle()) {
+        ball.dy = -ball.dy;
+        sendBallData();
+      } else if (xBallHitPaddle() === "left") {
+        ball.dx = -Math.abs(ball.dx);
+        ball.dy = -ball.dy;
+        sendBallData();
+      } else if (xBallHitPaddle() === "right") {
+        ball.dx = Math.abs(ball.dx);
+        ball.dy = -ball.dy;
+        sendBallData();
+      }
+    }
+    
+    if (yBallHitWall()) {
+      ball.dy = -ball.dy;
+    } else if (yHitBottom()) {
+
+      ball.dy = -ball.dy; //DELETE THIS AFTER MULTIPLAYER WORKS
+
+      // paddle.lives -= 1;
+      // if (paddle.lives) {
+      //   paddle.x = (canvas.width - paddle.width) / 2;
+      //   ball.x = canvas.width/2;
+      //   ball.y = canvas.height - 23;
+      // } else {
+      //   alert("Game Over!");
+      //   document.location.reload();
+      //   clearInterval(interval);
+      // }
+    }
+    
+
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+    ctx.fillStyle = "#ff6666";
+    ctx.fill();
+    ctx.closePath();
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+  }
+
+  function sendBallData() {
+    let ballData = { 
+      type: 'ball',
+      playerID: client_id,
+      x: ball.x,
+      y: ball.y,
+      dx: ball.dx,
+      dy: ball.dy
+    };
+    client.send(JSON.stringify(ballData));
+  }
+
+  function xBallHitWall() {
+    return ball.x+ball.dx > canvas.width-ball.radius || ball.x+ball.dx < ball.radius;
+  }
+
+  function yBallHitWall() {
+    return ball.y+ball.dy < ball.radius;
+  }
+
+  function yHitBottom() {
+    return ball.y+ball.dy > canvas.height-ball.radius;
+  }
+
+  function yBallHitPaddle() {
+    return (ball.x+ball.dx > paddle1.x && ball.x+ball.dx < paddle1.x+paddle1.width) && ball.y+ball.dy > canvas.height-paddle1.height-10-ball.radius;
+  }
+
+  function xBallHitPaddle() {
+    if (ball.y+ball.dy > canvas.height-paddle1.height-10 && ball.y+ball.dy < canvas.height-10) {
+      if (ball.x+ball.dx > paddle1.x-ball.radius && ball.x+ball.dx < paddle1.x+paddle1.width) {
+        return "left";
+      } else if (ball.x+ball.dx < paddle1.x+paddle1.width+ball.radius && ball.x+ball.dx > paddle1.x) {
+        return "right";
+      }
+    } else {
+      return false;
     }
   }
   
@@ -189,5 +278,4 @@ window.onload = function() {
   }
   
   const interval = setInterval(draw, 10);
-  
 }
