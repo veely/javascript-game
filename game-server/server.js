@@ -6,23 +6,38 @@ let id = 0;
 let playerData = {};
 let clients = [];
 
+ballStart = { x: 300, y: 200 };
+
 const server = express()
   .use(express.static('public'))
   .listen(PORT, '0.0.0.0', 'localhost', () => console.log(`Listening on ${ PORT }`));
 
 const wss = new SocketServer({ server });
 
+wss.broadcast = function broadcast(data) {
+  wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+};
+
 wss.on('connection', function connection(ws) {
   console.log('Clients connected: ' + wss.clients.size);
+  if (wss.clients.size === 2) {
+    wss.broadcast({ type: 'start' });
+  } 
   clients.push(ws);
   ws.on('message', function incoming(message) {
     let data = JSON.parse(message);
     switch(data.type) {
       case 'paddle':
         playerData[data.id] = data.position;
-        // if (playerData.id === 0) {
-          clients[1].send(JSON.stringify({ type: 'paddle', id: 0, position: playerData['0'] }));
-        // }
+        if (data.id === 0) {
+          clients[1].send(JSON.stringify({ type: 'opponent', id: 0, position: playerData['0'] }));
+        } else if (data.id === 1) {
+          clients[0].send(JSON.stringify({ type: 'opponent', id: 1, position: playerData['1'] }));
+        }
         console.log(playerData);
         break;
     }
@@ -37,31 +52,3 @@ wss.on('connection', function connection(ws) {
   ws.send(JSON.stringify({ type: 'id', id: id }));
   id++;
 });
-
-
-
-class Paddle {
-  constructor(lives, speed, canvas) {
-    this.lives = lives;
-    this.speed = speed;
-    this.height = 13;
-    this.width = 75;
-    this.x = (canvas.width - this.width) / 2;
-  }
-
-  drawPaddle(ctx, canvas) {
-    ctx.beginPath();
-    ctx.rect(this.x, canvas.height - this.height - 10, this.width, this.height);
-    ctx.fillStyle = "#ff6666";
-    ctx.fill();
-    ctx.closePath();    
-  }
-
-  moveRight() {
-    this.x += this.speed;
-  }
-
-  moveLeft() {
-    this.x -= this.speed;
-  }
-}

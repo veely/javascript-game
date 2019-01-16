@@ -16,26 +16,29 @@ export class Ball {
     if (this.yHitWall(canvas) || (this.dy > 0 && this.yHitPaddle(paddle.x, paddle.width, paddle.height, canvas))) {
       this.dy = -this.dy;
     } else if (this.yHitBottom(canvas)) {
-      paddle.lives -= 1;
-      if (paddle.lives) {
-        paddle.x = (canvas.width - paddle.width) / 2;
-        this.x = canvas.width/2;
-        this.y = canvas.height - 23;
-      } else {
-        alert("Game Over!");
-        document.location.reload();
-        clearInterval(interval);
-      }
+
+      this.dy = -this.dy; //DELETE THIS AFTER MULTIPLAYER WORKS
+
+      // paddle.lives -= 1;
+      // if (paddle.lives) {
+      //   paddle.x = (canvas.width - paddle.width) / 2;
+      //   this.x = canvas.width/2;
+      //   this.y = canvas.height - 23;
+      // } else {
+      //   alert("Game Over!");
+      //   document.location.reload();
+      //   clearInterval(interval);
+      // }
     }
 
     //make this more readable
     if (this.dy > 0) {
       if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "left") {
         this.dx = -Math.abs(this.dx);
-        this.dy = -Math.abs(this.dy);
+        this.dy = -this.dy;
       } else if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "right") {
         this.dx = Math.abs(this.dx);
-        this.dy = -Math.abs(this.dy);
+        this.dy = -this.dy;
       }
     }
 

@@ -6,6 +6,7 @@ window.onload = function() {
   const ctx = canvas.getContext("2d");
   let client_id = null;
 
+  let start = false;
   
   let rightPressed = false;
   let leftPressed = false;
@@ -27,14 +28,14 @@ window.onload = function() {
   const paddleWidth = 75;
   
   var ball = new Ball(canvas.width/2, canvas.height - 23, ballRadius, ballSpeed);
-  var paddle = new Paddle(lives, paddleSpeed, canvas, canvas.height - paddleHeight - 10, paddleHeight, paddleWidth);
+  var paddle1 = new Paddle(lives, paddleSpeed, canvas, canvas.height - paddleHeight - 10, paddleHeight, paddleWidth);
   var paddle2 = new Paddle(lives, paddleSpeed, canvas, 10, paddleHeight, paddleWidth);
   
   var bricks = [];
   for (let c=0; c<brickColumnCount; c++) {
     bricks[c] = [];
     for (let r=0; r<brickRowCount; r++) {
-      bricks[c][r] = { x: 0, y: 0, hit: false };
+      bricks[c][r] = { x: -100, y: -100, hit: false };
     }
   }
   
@@ -47,8 +48,12 @@ window.onload = function() {
         case 'id':
           client_id = data.id;
           break;
-        case 'paddle':
-          paddle2.x = data.position;
+        case 'opponent':
+          paddle2.x = canvas.width-paddleWidth-data.position;
+          break;
+        case 'start':
+          console.log("start");
+          start = true;
           break;
       }
     };
@@ -57,7 +62,7 @@ window.onload = function() {
   function drawLives() {
     ctx.font = "16px Cambria";
     ctx.fillStyle = "#ff6666";
-    ctx.fillText("Lives: "+paddle.lives, canvas.width-65, 20);
+    ctx.fillText("Lives: "+paddle1.lives, canvas.width-65, 20);
   }
 
   function drawScore() {
@@ -136,23 +141,24 @@ window.onload = function() {
   }
 
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawLives();
-    drawScore();
-    // drawBricks();
-    collisionDetection();
-    paddle.drawPaddle(ctx, canvas);
-    paddle2.drawPaddle(ctx, canvas);
-    // ball.drawBall(ctx, paddle, canvas, interval);
-    if (rightPressed && paddle.x+paddle.width < canvas.width) {
-      paddle.moveRight();
-      client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle.x }));
+    if (start) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawLives();
+      drawScore();
+      // drawBricks();
+      // collisionDetection();
+      paddle1.drawPaddle(ctx, canvas);
+      paddle2.drawPaddle(ctx, canvas);
+      ball.drawBall(ctx, paddle1, canvas, interval);
+      if (rightPressed && paddle1.x+paddle1.width < canvas.width) {
+        paddle1.moveRight();
+        client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle1.x }));
+      }
+      if (leftPressed && paddle1.x > 0) {
+        paddle1.moveLeft();
+        client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle1.x }));
+      }
     }
-    if (leftPressed && paddle.x > 0) {
-      paddle.moveLeft();
-      client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle.x }));
-    }
-
   }
   
   document.addEventListener("keydown", keyDownHandler, false);
@@ -175,4 +181,5 @@ window.onload = function() {
   }
   
   const interval = setInterval(draw, 10);
+  
 }
