@@ -1,9 +1,9 @@
 export class Ball {
-  constructor(x, y, radius, speed) {
-    this.x = x;
-    this.y = y;
-    this.dx = speed;
-    this.dy = speed;
+  constructor(position, radius, direction) {
+    this.x = position.x;
+    this.y = position.y;
+    this.dx = direction.dx;
+    this.dy = direction.dy;
     this.radius = radius;
   }
 

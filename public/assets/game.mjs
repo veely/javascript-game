@@ -15,7 +15,9 @@ window.onload = function() {
   let lives = 3;
   let paddleSpeed = 5;
   
+  let ballPosition = { x: canvas.width/2, y: canvas.height - 23 };
   let ballSpeed = 3;
+  let ballDirection = { dx: ballSpeed, dy: ballSpeed };
   let ballRadius = 10;
   const brickRowCount = 4;
   const brickColumnCount = 8;
@@ -27,7 +29,7 @@ window.onload = function() {
   const paddleHeight = 15;
   const paddleWidth = 75;
   
-  var ball = new Ball(canvas.width/2, canvas.height - 23, ballRadius, ballSpeed);
+  var ball = new Ball(ballPosition, ballRadius, ballDirection);
   var paddle1 = new Paddle(lives, paddleSpeed, canvas, canvas.height - paddleHeight - 10, paddleHeight, paddleWidth);
   var paddle2 = new Paddle(lives, paddleSpeed, canvas, 10, paddleHeight, paddleWidth);
   
@@ -50,6 +52,12 @@ window.onload = function() {
           break;
         case 'opponent':
           paddle2.x = canvas.width-paddleWidth-data.position;
+          break;
+        case 'ball':
+          ball.x = data.x;
+          ball.y = data.y;
+          ball.dx = data.dx;
+          ball.dy = data.dy;
           break;
         case 'start':
           console.log("start");

@@ -6,7 +6,11 @@ let id = 0;
 let playerData = {};
 let clients = [];
 
-ballStart = { x: 300, y: 200 };
+canvasWidth = 750;
+canvasHeight = 400;
+
+let ballDataP1 = { type: 'ball', x: canvasWidth/2, y: canvasHeight - 23, dx: 3, dy: 3 };
+let ballDataP2 = { type: 'ball', x: canvasWidth/2, y: 23, dx: -3, dy: -3 };
 
 const server = express()
   .use(express.static('public'))
@@ -24,10 +28,12 @@ wss.broadcast = function broadcast(data) {
 
 wss.on('connection', function connection(ws) {
   console.log('Clients connected: ' + wss.clients.size);
+  clients.push(ws);
   if (wss.clients.size === 2) {
+    clients[0].send(JSON.stringify(ballDataP1));
+    clients[1].send(JSON.stringify(ballDataP2));
     wss.broadcast({ type: 'start' });
   } 
-  clients.push(ws);
   ws.on('message', function incoming(message) {
     let data = JSON.parse(message);
     switch(data.type) {
