@@ -5,12 +5,18 @@ const PORT = 3001;
 let id = 0;
 let playerData = {};
 let clients = [];
+let lobbies = {};
+let count = 0;
 
 canvasWidth = 750;
 canvasHeight = 400;
 
-let ballDataP1 = { type: 'ball', x: canvasWidth/2, y: canvasHeight - 23, dx: 3, dy: 3 };
-let ballDataP2 = { type: 'ball', x: canvasWidth/2, y: 23, dx: -3, dy: -3 };
+let ballSpeed = 4;
+
+let ballData = [
+                 { type: 'ball', x: canvasWidth/2, y: canvasHeight - 23, dx: ballSpeed, dy: ballSpeed },
+                 { type: 'ball', x: canvasWidth/2, y: 23, dx: -ballSpeed, dy: -ballSpeed }
+               ];
 
 const server = express()
   .use(express.static('public'))
@@ -27,22 +33,32 @@ wss.broadcast = function broadcast(data) {
 };
 
 wss.on('connection', function connection(ws) {
+  playerData[id] = null;
+  ws.send(JSON.stringify({ type: 'id', id: id }));
+  id++;
+
   console.log('Clients connected: ' + wss.clients.size);
   clients.push(ws);
-  if (wss.clients.size === 2) {
-    clients[0].send(JSON.stringify(ballDataP1));
-    clients[1].send(JSON.stringify(ballDataP2));
+  if (clients.length === 2) {
+    lobbies[count] = [clients[0], clients[1]];
+    clients = [];
+    lobbies[count].map((client, index) => {
+      client.send(JSON.stringify(ballData[index]));
+      client.send(JSON.stringify({ type: 'lobby', id: count, player: index }));
+    }); 
+    console.log(clients.length);
+    count++;
     wss.broadcast({ type: 'start' });
   } 
   ws.on('message', function incoming(message) {
     let data = JSON.parse(message);
     switch(data.type) {
       case 'paddle':
-        playerData[data.id] = data.position;
-        if (data.id === 0) {
-          clients[1].send(JSON.stringify({ type: 'opponent', id: 0, position: playerData['0'] }));
-        } else if (data.id === 1) {
-          clients[0].send(JSON.stringify({ type: 'opponent', id: 1, position: playerData['1'] }));
+        playerData[data.client_id] = data.position;
+        if (data.player === 0) {
+          lobbies[data.lobby_id][1].send(JSON.stringify({ type: 'opponent', position: playerData[data.client_id] }));
+        } else if (data.player === 1) {
+          lobbies[data.lobby_id][0].send(JSON.stringify({ type: 'opponent', position: playerData[data.client_id] }));
         }
         break;
       case 'ball':
@@ -54,9 +70,9 @@ wss.on('connection', function connection(ws) {
           dy: -data.dy
         }
         if (data.playerID === 0) {
-          clients[1].send(JSON.stringify(newBallData));
+          lobbies['0'][1].send(JSON.stringify(newBallData));
         } else if (data.playerID === 1) {
-          clients[0].send(JSON.stringify(newBallData));
+          lobbies['0'][0].send(JSON.stringify(newBallData));
         }
         break;
       default:
@@ -69,8 +85,4 @@ wss.on('connection', function connection(ws) {
     console.log('Client disconnected');
     console.log('Clients connected: ' + wss.clients.size);
   });
-  
-  playerData[id] = null;
-  ws.send(JSON.stringify({ type: 'id', id: id }));
-  id++;
 });

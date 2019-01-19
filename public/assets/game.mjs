@@ -5,6 +5,8 @@ window.onload = function() {
   const canvas = document.getElementById("gameBoard");
   const ctx = canvas.getContext("2d");
   let client_id = null;
+  let lobby_id = null;
+  let player_number = null;
 
   let start = false;
   
@@ -41,7 +43,7 @@ window.onload = function() {
     }
   }
   
-  const client = new WebSocket("ws://localhost:3001/");
+  const client = new WebSocket("ws://192.168.0.201:3001/");
   client.onopen = (openEvent) => {
     console.log('Connection established');
     client.onmessage = (event) => {
@@ -49,6 +51,10 @@ window.onload = function() {
       switch(data.type) {
         case 'id':
           client_id = data.id;
+          break;
+        case 'lobby':
+          lobby_id = data.id;
+          player_number = data.player;
           break;
         case 'opponent':
           paddle2.x = canvas.width-paddleWidth-data.position;
@@ -157,104 +163,15 @@ window.onload = function() {
       // collisionDetection();
       paddle1.drawPaddle(ctx, canvas);
       paddle2.drawPaddle(ctx, canvas);
-      drawBall();
+      ball.drawBall(ctx, paddle1, canvas, interval, client, client_id);
       if (rightPressed && paddle1.x+paddle1.width < canvas.width) {
         paddle1.moveRight();
-        client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle1.x }));
+        client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
       }
       if (leftPressed && paddle1.x > 0) {
         paddle1.moveLeft();
-        client.send(JSON.stringify({ type: 'paddle', id: client_id, position: paddle1.x }));
+        client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
       }
-    }
-  }
-
-  function drawBall() {
-    if (xBallHitWall()) {
-      ball.dx = -ball.dx;
-    }
-
-    //make this more readable
-    if (ball.dy > 0) {
-      if (yBallHitPaddle()) {
-        ball.dy = -ball.dy;
-        sendBallData();
-      } else if (xBallHitPaddle() === "left") {
-        ball.dx = -Math.abs(ball.dx);
-        ball.dy = -ball.dy;
-        sendBallData();
-      } else if (xBallHitPaddle() === "right") {
-        ball.dx = Math.abs(ball.dx);
-        ball.dy = -ball.dy;
-        sendBallData();
-      }
-    }
-    
-    if (yBallHitWall()) {
-      ball.dy = -ball.dy;
-    } else if (yHitBottom()) {
-
-      ball.dy = -ball.dy; //DELETE THIS AFTER MULTIPLAYER WORKS
-
-      // paddle.lives -= 1;
-      // if (paddle.lives) {
-      //   paddle.x = (canvas.width - paddle.width) / 2;
-      //   ball.x = canvas.width/2;
-      //   ball.y = canvas.height - 23;
-      // } else {
-      //   alert("Game Over!");
-      //   document.location.reload();
-      //   clearInterval(interval);
-      // }
-    }
-    
-
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
-    ctx.fillStyle = "#ff6666";
-    ctx.fill();
-    ctx.closePath();
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-  }
-
-  function sendBallData() {
-    let ballData = { 
-      type: 'ball',
-      playerID: client_id,
-      x: ball.x,
-      y: ball.y,
-      dx: ball.dx,
-      dy: ball.dy
-    };
-    client.send(JSON.stringify(ballData));
-  }
-
-  function xBallHitWall() {
-    return ball.x+ball.dx > canvas.width-ball.radius || ball.x+ball.dx < ball.radius;
-  }
-
-  function yBallHitWall() {
-    return ball.y+ball.dy < ball.radius;
-  }
-
-  function yHitBottom() {
-    return ball.y+ball.dy > canvas.height-ball.radius;
-  }
-
-  function yBallHitPaddle() {
-    return (ball.x+ball.dx > paddle1.x && ball.x+ball.dx < paddle1.x+paddle1.width) && ball.y+ball.dy > canvas.height-paddle1.height-10-ball.radius;
-  }
-
-  function xBallHitPaddle() {
-    if (ball.y+ball.dy > canvas.height-paddle1.height-10 && ball.y+ball.dy < canvas.height-10) {
-      if (ball.x+ball.dx > paddle1.x-ball.radius && ball.x+ball.dx < paddle1.x+paddle1.width) {
-        return "left";
-      } else if (ball.x+ball.dx < paddle1.x+paddle1.width+ball.radius && ball.x+ball.dx > paddle1.x) {
-        return "right";
-      }
-    } else {
-      return false;
     }
   }
   

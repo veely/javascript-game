@@ -7,13 +7,13 @@ export class Ball {
     this.radius = radius;
   }
 
-  drawBall(ctx, paddle, canvas, interval) {
+  drawBall(ctx, paddle, canvas, interval, client, client_id) {
     if (this.xHitWall(canvas)) {
       this.dx = -this.dx;
     }
 
     //make this more readable
-    if (this.yHitWall(canvas) || (this.dy > 0 && this.yHitPaddle(paddle.x, paddle.width, paddle.height, canvas))) {
+    if (this.yHitWall(canvas)) {
       this.dy = -this.dy;
     } else if (this.yHitBottom(canvas)) {
 
@@ -33,12 +33,17 @@ export class Ball {
 
     //make this more readable
     if (this.dy > 0) {
-      if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "left") {
+      if (this.yHitPaddle(paddle.x, paddle.width, paddle.height, canvas)) {
+        this.dy = -this.dy;
+        this.sendBallData(client, client_id);
+      } else if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "left") {
         this.dx = -Math.abs(this.dx);
         this.dy = -this.dy;
+        this.sendBallData(client, client_id);
       } else if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "right") {
         this.dx = Math.abs(this.dx);
         this.dy = -this.dy;
+        this.sendBallData(client, client_id);
       }
     }
 
@@ -77,5 +82,18 @@ export class Ball {
     } else {
       return false;
     }
+  }
+
+  sendBallData(client, client_id) {
+    console.log("sendballdata");
+    let ballData = { 
+      type: 'ball',
+      playerID: client_id,
+      x: this.x,
+      y: this.y,
+      dx: this.dx,
+      dy: this.dy
+    };
+    client.send(JSON.stringify(ballData));
   }
 }
