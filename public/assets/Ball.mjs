@@ -7,7 +7,7 @@ export class Ball {
     this.radius = radius;
   }
 
-  drawBall(ctx, paddle, canvas, interval, client, client_id) {
+  drawBall(ctx, paddle, canvas, interval, client, client_id, lobby_id, player_number) {
     if (this.xHitWall(canvas)) {
       this.dx = -this.dx;
     }
@@ -35,15 +35,15 @@ export class Ball {
     if (this.dy > 0) {
       if (this.yHitPaddle(paddle.x, paddle.width, paddle.height, canvas)) {
         this.dy = -this.dy;
-        this.sendBallData(client, client_id);
+        this.sendBallData(client, client_id, lobby_id, player_number);
       } else if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "left") {
         this.dx = -Math.abs(this.dx);
         this.dy = -this.dy;
-        this.sendBallData(client, client_id);
+        this.sendBallData(client, client_id, lobby_id, player_number);
       } else if (this.xHitPaddle(paddle.x, paddle.width, paddle.height, canvas) === "right") {
         this.dx = Math.abs(this.dx);
         this.dy = -this.dy;
-        this.sendBallData(client, client_id);
+        this.sendBallData(client, client_id, lobby_id, player_number);
       }
     }
 
@@ -84,11 +84,11 @@ export class Ball {
     }
   }
 
-  sendBallData(client, client_id) {
-    console.log("sendballdata");
+  sendBallData(client, client_id, lobby_id, player_number) {
     let ballData = { 
       type: 'ball',
-      playerID: client_id,
+      lobby_id: lobby_id,
+      player: player_number,
       x: this.x,
       y: this.y,
       dx: this.dx,

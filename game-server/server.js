@@ -68,10 +68,10 @@ wss.on('connection', function connection(ws) {
           dx: -data.dx,
           dy: -data.dy
         }
-        if (data.playerID === 0) {
-          lobbies['0'][1].send(JSON.stringify(newBallData));
-        } else if (data.playerID === 1) {
-          lobbies['0'][0].send(JSON.stringify(newBallData));
+        if (data.player === 0) {
+          lobbies[data.lobby_id][1].send(JSON.stringify(newBallData));
+        } else if (data.player === 1) {
+          lobbies[data.lobby_id][0].send(JSON.stringify(newBallData));
         }
         break;
       default:

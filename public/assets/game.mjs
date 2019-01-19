@@ -163,7 +163,7 @@ window.onload = function() {
       // collisionDetection();
       paddle1.drawPaddle(ctx, canvas);
       paddle2.drawPaddle(ctx, canvas);
-      ball.drawBall(ctx, paddle1, canvas, interval, client, client_id);
+      ball.drawBall(ctx, paddle1, canvas, interval, client, client_id, lobby_id, player_number);
       if (rightPressed && paddle1.x+paddle1.width < canvas.width) {
         paddle1.moveRight();
         client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
