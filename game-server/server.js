@@ -46,7 +46,6 @@ wss.on('connection', function connection(ws) {
       client.send(JSON.stringify(ballData[index]));
       client.send(JSON.stringify({ type: 'lobby', id: count, player: index }));
     }); 
-    console.log(clients.length);
     count++;
     wss.broadcast({ type: 'start' });
   } 
