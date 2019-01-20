@@ -32,6 +32,12 @@ wss.broadcast = function broadcast(data) {
   });
 };
 
+function lobbyBroadcast(lobby, data) {
+  for (client of lobby) {
+    client.send(JSON.stringify(data));
+  }
+}
+
 wss.on('connection', function connection(ws) {
   playerData[id] = null;
   ws.send(JSON.stringify({ type: 'id', id: id }));
@@ -46,8 +52,8 @@ wss.on('connection', function connection(ws) {
       client.send(JSON.stringify(ballData[index]));
       client.send(JSON.stringify({ type: 'lobby', id: count, player: index }));
     }); 
+    lobbyBroadcast(lobbies[count], { type: 'start' });
     count++;
-    wss.broadcast({ type: 'start' });
   } 
   ws.on('message', function incoming(message) {
     let data = JSON.parse(message);
