@@ -35,15 +35,15 @@ export class Ball {
     if (this.dy > 0) {
       if (this.yHitPaddle(data.paddle.x, data.paddle.width, data.paddle.height, data.canvas)) {
         this.dy = -this.dy;
-        this.sendBallData(data.client, data.client_id, data.lobby_id, data.player_number);
+        this.sendBallData(data);
       } else if (this.xHitPaddle(data.paddle.x, data.paddle.width, data.paddle.height, data.canvas) === "left") {
         this.dx = -Math.abs(this.dx);
         this.dy = -this.dy;
-        this.sendBallData(data.client, client_id, data.lobby_id, data.player_number);
+        this.sendBallData(data);
       } else if (this.xHitPaddle(data.paddle.x, data.paddle.width, data.paddle.height, data.canvas) === "right") {
         this.dx = Math.abs(this.dx);
         this.dy = -this.dy;
-        this.sendBallData(data.client, data.client_id, data.lobby_id, data.player_number);
+        this.sendBallData(data);
       }
     }
     
@@ -84,17 +84,16 @@ export class Ball {
     }
   }
 
-  sendBallData(client, client_id, lobby_id, player_number) {
+  sendBallData(data) {
     let ballData = { 
       type: 'ball',
-      lobby_id: lobby_id,
-      player: player_number,
+      lobby_id: data.lobby_id,
+      player: data.player_number,
       x: this.x,
       y: this.y,
       dx: this.dx,
       dy: this.dy
     };
-
-    client.send(JSON.stringify(ballData));
+    data.client.send(JSON.stringify(ballData));
   }
 }
