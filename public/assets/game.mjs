@@ -7,6 +7,7 @@ window.onload = function() {
   let client_id = null;
   let lobby_id = null;
   let player_number = null;
+  let isConnected = false;
 
   let start = false;
   
@@ -45,6 +46,7 @@ window.onload = function() {
   
   const client = new WebSocket("ws://192.168.0.201:3001/");
   client.onopen = (openEvent) => {
+    isConnected = true;
     console.log('Connection established');
     client.onmessage = (event) => {
       let data = JSON.parse(event.data);
@@ -67,11 +69,18 @@ window.onload = function() {
           break;
         case 'start':
           console.log("start");
+          clearInterval(waitingInterval);
           start = true;
           break;
       }
     };
   };
+
+  function drawConnectionStatus() {
+    ctx.font = "20px Cambria";
+    ctx.fillStyle = "#ff6666";
+    ctx.fillText("No response from game server.", 250, canvas.height/2);
+  }
 
   function drawLives() {
     ctx.font = "16px Cambria";
@@ -81,8 +90,26 @@ window.onload = function() {
 
   function drawScore() {
     ctx.font = "16px Cambria";
-    ctx.fillstyle = "#ff6666";
+    ctx.fillStyle = "#ff6666";
     ctx.fillText("Score: "+score, 13, 20);
+  }
+
+  function drawWaiting() {
+    ctx.font = "20px Cambria";
+    ctx.fillStyle = "#ff6666";
+    ctx.fillText("Waiting for a second player to connect"+dotCount(), 210, canvas.height/2);
+  }
+
+  function dotAnimation() {
+    if (dots < 3) {
+      dots++;
+    } else {
+      dots = 1;
+    }
+  }
+
+  function dotCount() {
+    return Array(dots + 1).join(' .');
   }
 
   function drawBricks() {
@@ -155,34 +182,43 @@ window.onload = function() {
   }
 
   function draw() {
-    if (start) {
+    if (isConnected) {
+      if (start) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // drawLives();
+        // drawScore();
+        // drawBricks();
+        // collisionDetection();
+        
+        paddle1.drawPaddle(ctx, canvas);
+        paddle2.drawPaddle(ctx, canvas);
+  
+        let drawBallData = {
+          ctx: ctx,
+          paddle: paddle1,
+          canvas: canvas,
+          client: client,
+          client_id: client_id,
+          lobby_id: lobby_id,
+          player_number: player_number
+        }
+  
+        ball.drawBall(drawBallData);
+        if (rightPressed && paddle1.x+paddle1.width < canvas.width) {
+          paddle1.moveRight();
+          client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
+        }
+        if (leftPressed && paddle1.x > 0) {
+          paddle1.moveLeft();
+          client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
+        }
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawWaiting();
+      }
+    } else {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // drawLives();
-      // drawScore();
-      // drawBricks();
-      // collisionDetection();
-      paddle1.drawPaddle(ctx, canvas);
-      paddle2.drawPaddle(ctx, canvas);
-
-      let drawBallData = {
-        ctx: ctx,
-        paddle: paddle1,
-        canvas: canvas,
-        client: client,
-        client_id: client_id,
-        lobby_id: lobby_id,
-        player_number: player_number
-      }
-
-      ball.drawBall(drawBallData);
-      if (rightPressed && paddle1.x+paddle1.width < canvas.width) {
-        paddle1.moveRight();
-        client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
-      }
-      if (leftPressed && paddle1.x > 0) {
-        paddle1.moveLeft();
-        client.send(JSON.stringify({ type: 'paddle', client_id: client_id, lobby_id: lobby_id, player: player_number, position: paddle1.x }));
-      }
+      drawConnectionStatus();
     }
   }
   
@@ -206,4 +242,7 @@ window.onload = function() {
   }
   
   const interval = setInterval(draw, 10);
+ 
+  let dots = 1;
+  const waitingInterval = setInterval(dotAnimation, 1000);
 }
